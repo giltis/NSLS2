@@ -54,7 +54,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
                window_size, max_peak_count, thresh):
     """
     Estimate the sample-detector distance
-    
+
     Given a radially integrated calibration image return an estimate for
     the sample-detector distance.  This function does not require a
     rough estimate of what d should be.

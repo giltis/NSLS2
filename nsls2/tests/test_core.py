@@ -318,56 +318,6 @@ def test_large_verbosedict():
         assert(False)
 
 
-def test_bin_image_to_1D_radius():
-    shape = (256, 300)
-    center = (120, 150)
-    R = core.pixel_to_radius(shape, center)
-
-    I = np.zeros_like(R, dtype='int')
-
-    ring_width = 2
-
-    ring_locs = [10, 50, 76]
-    for r in ring_locs:
-        I += ((R >= r) * (R < (r + ring_width))) * r
-
-    A, B, C = core.bin_image_to_1D(I, center,
-                    core.pixel_to_radius,
-                    bin_min=0, bin_max=100,
-                    bin_num=50)
-
-    for j, (a, b, c) in enumerate(zip(A, B, C)):
-        if j*2 in ring_locs:
-            assert b == j * 2 * c
-        else:
-            assert b == 0
-
-
-def test_bin_image_to_1D_phi():
-    shape = (256, 300)
-    center = (120, 150)
-    phi = core.pixel_to_phi(shape, center)
-
-    nphi_steps = 25
-
-    I = np.zeros_like(phi, dtype='int')
-
-    phi_steps = np.linspace(-np.pi, np.pi + np.spacing(np.pi),
-                            nphi_steps + 1,
-                            endpoint=True)
-    for j, (bot, top) in enumerate(core.pairwise(phi_steps)):
-        mask = (phi >= bot) * (phi < top)
-        I[mask] = j + 1
-
-    A, B, C = core.bin_image_to_1D(I, center,
-                    core.pixel_to_phi,
-                    bin_min=-np.pi, bin_max=np.pi,
-                    bin_num=nphi_steps)
-
-    for j, (a, b, c) in enumerate(zip(A, B, C)):
-        assert b == c * (j + 1)
-
-
 def test_d_q_conversion():
     assert_equal(2 * np.pi, core.d_to_q(1))
     assert_equal(2 * np.pi, core.q_to_d(1))
@@ -393,6 +343,33 @@ def test_q_twotheta_conversion():
                                                      wavelength),
                                   wavelength),
                               decimal=12)
+
+
+def test_radius_to_twotheta():
+    dist_sample = 100
+    radius = np.linspace(50, 100)
+
+    two_theta = np.array([0.92729522, 0.94355502, 0.95968105,
+                          0.97567288, 0.99153015, 1.00725259,
+                          1.02284, 1.03829223, 1.05360922,
+                          1.06879095, 1.0838375, 1.09874897,
+                          1.11352554, 1.12816744, 1.14267496,
+                          1.15704843, 1.17128823, 1.18539481,
+                          1.19936863, 1.21321022, 1.22692013,
+                          1.24049897, 1.25394738, 1.26726602,
+                          1.2804556, 1.29351685, 1.30645055,
+                          1.31925749, 1.33193847, 1.34449436,
+                          1.35692602, 1.36923433, 1.3814202,
+                          1.39348456, 1.40542836, 1.41725254,
+                          1.4289581, 1.440546, 1.45201725,
+                          1.46337287, 1.47461386, 1.48574126,
+                          1.4967561, 1.50765941, 1.51845226,
+                          1.52913569, 1.53971075, 1.5501785,
+                          1.56054001, 1.57079633])
+
+    assert_array_almost_equal(two_theta,
+                              core.radius_to_twotheta(dist_sample,
+                                                      radius), decimal=8)
 
 
 def test_multi_tau_lags():
@@ -551,6 +528,35 @@ def test_img_to_relative_xyi(random_seed=None):
             logger.error('sum(returned_i): {0}'.format(sum(i)))
             logger.error('expected_x: {0}'.format(expected_total_intensity))
             six.reraise(AssertionError, ae, sys.exc_info()[2])
+
+
+def test_roi_rectangles():
+    detector_size = (15, 10)
+    num_rois = 3
+    roi_data = np.array(([2, 2, 3, 3], [6, 7, 3, 2], [11, 8, 5, 2]),
+                        dtype=np.int64)
+
+    xy_inds, num_pixels = core.roi_rectangles(num_rois, roi_data, detector_size)
+
+    xy_inds_m =([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3])
+    num_pixels_m = [9, 6, 8]
+
+    assert_array_equal(num_pixels, num_pixels_m)
+    assert_array_equal(xy_inds, np.ravel(xy_inds_m))
 
 
 if __name__ == "__main__":

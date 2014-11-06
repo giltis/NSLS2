@@ -595,72 +595,6 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     return bins, val, count
 
 
-def bin_image_to_1D(img,
-                    calibrated_center,
-                    pixel_to_1D_func, pixel_to_1D_kwarg=None,
-                    bin_min=None, bin_max=None, bin_num=None):
-    """Integrates an image to a 1D curve.
-
-    The first step is use the `pixel_to_1D_func` to convert
-    each pixel location to a scalar.  Example of this would be
-    distance from the center in mm, azimuthal angle, or converting to q.
-
-    Parameters
-    ----------
-    img : ndarray
-        The image to integrate
-
-    calibrated_center : tuple
-        The center of the image (row, col)
-
-    pixel_to_1D_func : function
-        A function that takes in an image shape, calibrated_center
-        and a dict of kwargs and returns an array of the same shape
-        filled with a scalar for that pixel position (R2 -> R1 mapping).
-        The function must have the following signature ::
-
-            output = func(img.shape, calibrated_center, **pixel_to_1D_kwarg)
-
-        such that ::
-
-            output.shape == img.shape
-
-        and output[i, j] corresponds to img[i, j]
-
-
-    pixel_to_1D_kwargs : dict, optional
-        Any additional keyword arguments to pass through to the warp function
-
-    bin_min : float, optional
-        The lower limit of the binning
-
-    bin_max : float, optional
-        The upper limit of binning
-
-    bin_num : int, optional
-        The number of bins
-
-    Returns
-    -------
-    bin_edges : array
-        The bin edges, length N+1
-
-    bin_sum : array
-        The sum of the pixels that fell in each bin
-
-    bin_count : array
-        The number of pixels in each bin
-    """
-    if pixel_to_1D_kwarg is None:
-        pixel_to_1D_kwarg = {}
-
-    values_1D = pixel_to_1D_func(img.shape, calibrated_center,
-                             **pixel_to_1D_kwarg)
-
-    return bin_1D(values_1D.ravel(), img.ravel(), min_x=bin_min,
-                  max_x=bin_max, nx=bin_num)
-
-
 def pixel_to_radius(shape, calibrated_center, pixel_size=None):
     """
     Converts pixel positions to radius from the calibrated center
@@ -728,6 +662,27 @@ def pixel_to_phi(shape, calibrated_center, pixel_size=None):
                        pixel_size[0] * (np.arange(shape[0]) -
                                         calibrated_center[0]))
     return np.arctan2(X, Y)
+
+
+def radius_to_twotheta(dist_sample, radius):
+    """
+    Converts radius from the calibrated center to scattering angle
+    (2:math:`2\\theta`) with known detector to sample distance.
+
+    Parameters
+    ----------
+    dist_sample : float
+        distance from the sample to the detector (mm)
+
+    radius : array
+        The L2 norm of the distance of each pixel from the calibrated center.
+
+    Returns
+    -------
+    two_theta : array
+        An array of :math:`2\\theta` values
+    """
+    return 2 * np.arctan(radius / dist_sample)
 
 
 def wedge_integration(src_data, center, theta_start,
@@ -1216,3 +1171,56 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     lag_steps = np.append(lag_steps, np.array(lag))
 
     return tot_channels, lag_steps
+
+
+def roi_rectangles(num_rois, roi_data, detector_size):
+    """
+     Parameters
+    ----------
+    num_rois: int
+        number of region of interests(roi)
+
+    roi_data: ndarray
+        upper left co-ordinates of roi's and the, length and width of roi's
+        from those co-ordinates
+        shape is [num_rois][4]
+
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector.
+        Order is (num_rows, num_columns)
+
+    Returns
+    -------
+    q_inds : ndarray
+        indices of the Q values for the required shape
+        shape [detector_size[0]*detector_size[1]][1]
+
+    num_pixels : ndarray
+        number of pixels in certain rectangle shape
+    """
+
+    mesh = np.zeros(detector_size, dtype=np.int64)
+
+    num_pixels = []
+    # for i in range(0, num_rois):
+    for i, (col_coor, row_coor, col_val, row_val) in enumerate(roi_data, 0):
+
+        left, right = np.max([col_coor, 0]), np.min([col_coor + col_val,
+                                                     detector_size[0]])
+        top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
+                                                     detector_size[1]])
+
+        area = (right - left) * (bottom - top)
+
+        # find the number of pixels in each roi
+        num_pixels.append(area)
+
+        slc1 = slice(left, right)
+        slc2 = slice(top, bottom)
+
+        # assign a different scalar for each roi
+        mesh[slc1, slc2] = (i + 1)
+
+    q_inds = np.ravel(mesh)
+
+    return q_inds, num_pixels
