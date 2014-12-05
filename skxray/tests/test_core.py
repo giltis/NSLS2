@@ -45,9 +45,9 @@ import sys
 
 from nose.tools import assert_equal, assert_true, raises
 
-import nsls2.core as core
+import skxray.core as core
 
-from nsls2.testing.decorators import known_fail_if
+from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
 
 
@@ -349,23 +349,16 @@ def test_radius_to_twotheta():
     dist_sample = 100
     radius = np.linspace(50, 100)
 
-    two_theta = np.array([0.92729522, 0.94355502, 0.95968105,
-                          0.97567288, 0.99153015, 1.00725259,
-                          1.02284, 1.03829223, 1.05360922,
-                          1.06879095, 1.0838375, 1.09874897,
-                          1.11352554, 1.12816744, 1.14267496,
-                          1.15704843, 1.17128823, 1.18539481,
-                          1.19936863, 1.21321022, 1.22692013,
-                          1.24049897, 1.25394738, 1.26726602,
-                          1.2804556, 1.29351685, 1.30645055,
-                          1.31925749, 1.33193847, 1.34449436,
-                          1.35692602, 1.36923433, 1.3814202,
-                          1.39348456, 1.40542836, 1.41725254,
-                          1.4289581, 1.440546, 1.45201725,
-                          1.46337287, 1.47461386, 1.48574126,
-                          1.4967561, 1.50765941, 1.51845226,
-                          1.52913569, 1.53971075, 1.5501785,
-                          1.56054001, 1.57079633])
+    two_theta = np.array([0.46364761, 0.47177751, 0.47984053, 0.48783644, 0.49576508,
+                          0.5036263, 0.51142, 0.51914611, 0.52680461, 0.53439548,
+                          0.54191875, 0.54937448, 0.55676277, 0.56408372, 0.57133748,
+                          0.57852421, 0.58564412, 0.5926974, 0.59968432, 0.60660511,
+                          0.61346007, 0.62024949, 0.62697369, 0.63363301, 0.6402278,
+                          0.64675843, 0.65322528, 0.65962874, 0.66596924, 0.67224718,
+                          0.67846301, 0.68461716, 0.6907101, 0.69674228, 0.70271418,
+                          0.70862627, 0.71447905, 0.720273, 0.72600863, 0.73168643,
+                          0.73730693, 0.74287063, 0.74837805, 0.75382971, 0.75922613,
+                          0.76456784, 0.76985537, 0.77508925, 0.78027, 0.78539816])
 
     assert_array_almost_equal(two_theta,
                               core.radius_to_twotheta(dist_sample,
@@ -483,7 +476,7 @@ def test_img_to_relative_fails():
 
 
 def test_img_to_relative_xyi(random_seed=None):
-    from nsls2.core import img_to_relative_xyi
+    from skxray.core import img_to_relative_xyi
     # make the RNG deterministic
     if random_seed is not None:
         np.random.seed(42)
@@ -559,7 +552,7 @@ def test_roi_rectangles():
     assert_array_equal(xy_inds, np.ravel(xy_inds_m))
 
 
-if __name__ == "__main__":
+def run_image_to_relative_xyi_repeatedly():
     level = logging.ERROR
     ch = logging.StreamHandler()
     ch.setLevel(level)
@@ -572,3 +565,8 @@ if __name__ == "__main__":
         num_calls += 1
         if num_calls % 10 == 0:
             print('{0} calls successful'.format(num_calls))
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

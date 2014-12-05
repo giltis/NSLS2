@@ -3,7 +3,7 @@
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # @author: Li Li (lili@bnl.gov)                                        #
-# created on 08/19/2014                                                #
+# created on 09/03/2014                                                #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -35,62 +35,94 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import (absolute_import, division,
-                        unicode_literals, print_function)
-import six
+
+from __future__ import (absolute_import, division, unicode_literals, print_function)
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+import matplotlib.pyplot as plt
 
-import nsls2.calibration as calibration
-import nsls2.calibration as core
-from nose.tools import assert_raises
-
-
-def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
-    R = core.pixel_to_radius(shape, calibrated_center)
-    I = np.zeros_like(R)
-
-    for r in r_list:
-        tmp = 100 * np.exp(-((R - r)/r_width)**2)
-        I += tmp
-
-    return I
+from skxray.constants import Element
+from skxray.fitting.api import gaussian
 
 
-def test_refine_center():
-    center = np.array((500, 550))
-    I = _draw_gaussian_rings((1000, 1001), center,
-                             [50, 75, 100, 250, 500], 5)
+def get_line(name, incident_energy):
+    """
+    Plot emission lines for a given element.
 
-    nx_opts = [None, 300]
-    for nx in nx_opts:
-        out = calibration.refine_center(I, center+1, (1, 1),
-                                        phi_steps=20, nx=nx, min_x=10,
-                                        max_x=300, window_size=5,
-                                        thresh=0, max_peaks=4)
+    Parameters
+    ----------
+    name : str or int
+        element name, or atomic number
+    incident_energy : float
+        xray incident energy for fluorescence emission
+    """
+    e = Element(name)
+    lines = e.emission_line.all
+    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
 
-        assert np.all(np.abs(center - out) < .1)
+    i_min = 1e-6
+
+    plt.figure(figsize=(8, 6))
+
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+                plt.plot([data[1], data[1]],
+                         [i_min, item[1]], 'g-', linewidth=2.0)
+
+    plt.xlabel('Energy [KeV]')
+    plt.ylabel('Intensity')
+    plt.show()
+    plt.close()
+
+    return
 
 
-def test_blind_d():
-    gaus = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-    name = 'Si'
-    wavelength = .18
-    window_size = 5
-    threshold = .1
-    cal = calibration.calibration_standards[name]
+def get_spectrum(name, incident_energy, emax=15):
+    """
+    Plot fluorescence spectrum for a given element.
 
-    tan2theta = np.tan(cal.convert_2theta(wavelength))
+    Parameters
+    ----------
+    name : str or int
+        element name, or atomic number
+    incident_energy : float
+        xray incident energy for fluorescence emission
+    emax : float
+        max value on spectrum
 
-    D = 200
-    expected_r = D * tan2theta
+    """
+    e = Element(name)
+    lines = e.emission_line.all
+    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
 
-    bin_centers = np.linspace(0, 50, 2000)
-    I = np.zeros_like(bin_centers)
-    for r in expected_r:
-        I += gaus(bin_centers, r, 100, .2)
-    d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
-                                     I, window_size, len(expected_r),
-                                     threshold)
-    assert np.abs(d - D) < 1e-6
+    x = np.arange(0, emax, 0.01)
+
+    spec = np.zeros(len(x))
+
+    i_min = 1e-6
+
+    plt.figure(figsize=(8, 6))
+
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+
+                plt.plot([data[1], data[1]],
+                         [i_min, item[1]], 'g-', linewidth=2.0)
+
+    std = 0.1
+    area = std * np.sqrt(2 * np.pi)
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+                spec += gaussian(x, area, data[1], std) * item[1]
+
+    #plt.semilogy(x, spec)
+
+    plt.xlabel('Energy [KeV]')
+    plt.ylabel('Intensity')
+    plt.plot(x, spec)
+    plt.show()
+    plt.close()
+
+    return

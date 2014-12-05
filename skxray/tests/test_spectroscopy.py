@@ -40,7 +40,7 @@ import numpy as np
 from nose.tools import assert_raises
 from numpy.testing import assert_array_almost_equal
 
-from nsls2.spectroscopy import (align_and_scale, integrate_ROI,
+from skxray.spectroscopy import (align_and_scale, integrate_ROI,
                                 integrate_ROI_spectrum)
 
 
@@ -141,3 +141,8 @@ def test_integrate_ROI_reverse_input():
             integrate_ROI(E_rev, C_rev, [5.5, 17], [11.5, 23]),
             integrate_ROI(E, C, [5.5, 17], [11.5, 23])
             )
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

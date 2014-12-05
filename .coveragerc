@@ -1,11 +1,11 @@
 [run]
-source=nsls2
+source=scikit-xray
 [report]
 omit =
     */python?.?/*
     */site-packages/nose/*
-    /nsls2/tests/*
-    /nsls2/testing/*
+    *test*
+    skxray/__init__.py
     
 exclude_lines =
     def set_default

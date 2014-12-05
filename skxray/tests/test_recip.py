@@ -5,9 +5,9 @@ import six
 import numpy as np
 from nose.tools import raises
 
-from nsls2.testing.decorators import known_fail_if
+from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
-from nsls2 import recip
+from skxray import recip
 
 
 @known_fail_if(six.PY3)
@@ -104,3 +104,9 @@ def test_hkl_to_q():
                        14.73091986])
 
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
+
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
