@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 08/16/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -32,45 +35,61 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-'''
-Created on Jun 4, 2014
-'''
 
-import matplotlib as mpl
+
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import numpy as np
-from skxray.io.binary import read_binary
-from skxray.core import detector2D_to_1D
+from numpy.testing import assert_allclose
 
-def get_cbr4_sample_img():
-    # define the 
-    fname = "data/2d/cbr4_singlextal_rotate190_50deg_2s_90kev_203f.cor.042.cor"
-    params = {"filename": fname,
-            "nx": 2048,
-            "ny": 2048,
-            "nz": 1,
-            "headersize": 0,
-            "dsize": np.uint16,
-            # these numbers come from https://github.com/JamesDMartin/RamDog/blob/master/Calibration/APS--2009--CeO2.calib
-            "wavelength": .13702,
-            "detector_center": (1033.321, 1020.208),
-            "dist_sample": 188.672,
-            "pixel_size": (.200, .200)
-            }
-    
-    # read in a binary file
-    data, header = read_binary(**params)
-    
-    return data, params
-    
-def run():
-    # get the sample data
-    data, params = get_cbr4_sample_img
-    # convert the data from 2d array to xyi relative to beam center
-    xyi = detector2D_to_1D(data, **params)
-    # convert xy to r
-    r = np.linalg.norm(xyi[:,0:2])
-    # bin i based on r
-    
-    
-if __name__ == "__main__":
-    run()
+from skxray.fitting.background import snip_method
+
+
+def test_snip_method():
+    """
+    test of background function from xrf fit
+    """
+
+    xmin = 0
+    xmax = 3000
+
+    # three gaussian peak
+    xval = np.arange(-20, 20, 0.1)
+    std = 0.01
+    yval1 = np.exp(-xval**2 / 2 / std**2)
+    yval2 = np.exp(-(xval - 10)**2 / 2 / std**2)
+    yval3 = np.exp(-(xval + 10)**2 / 2 / std**2)
+
+    # background as exponential
+    a0 = 1.0
+    a1 = 0.1
+    a2 = 0.5
+    bg_true = a0 * np.exp(-xval * a1 + a2)
+
+    yval = yval1 + yval2 + yval3 + bg_true
+
+    bg = snip_method(yval,
+                     0.0, 1.0, 0.0,
+                     xmin=xmin, xmax=3000,
+                     spectral_binning=None, width=0.1)
+
+    #plt.semilogy(xval, bg_true, xval, bg)
+    #plt.plot(xval, bg_true, xval, bg)
+    #plt.show()
+
+    # ignore the boundary part
+    cutval = 15
+    bg_true_part = bg_true[cutval : -cutval]
+    bg_cal_part = bg[cutval : -cutval]
+
+
+    #assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
+    assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
+
+    return
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

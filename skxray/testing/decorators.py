@@ -1,4 +1,4 @@
-# ######################################################################
+########################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
@@ -32,45 +32,66 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-'''
-Created on Jun 4, 2014
-'''
+"""
+This module is for decorators related to testing.
 
-import matplotlib as mpl
-import numpy as np
-from skxray.io.binary import read_binary
-from skxray.core import detector2D_to_1D
+Much of this code is inspired by the code in matplotlib.  Exact copies
+are noted.
+"""
+from skxray.testing.noseclasses import (KnownFailureTest,
+                                       KnownFailureDidNotFailTest)
 
-def get_cbr4_sample_img():
-    # define the 
-    fname = "data/2d/cbr4_singlextal_rotate190_50deg_2s_90kev_203f.cor.042.cor"
-    params = {"filename": fname,
-            "nx": 2048,
-            "ny": 2048,
-            "nz": 1,
-            "headersize": 0,
-            "dsize": np.uint16,
-            # these numbers come from https://github.com/JamesDMartin/RamDog/blob/master/Calibration/APS--2009--CeO2.calib
-            "wavelength": .13702,
-            "detector_center": (1033.321, 1020.208),
-            "dist_sample": 188.672,
-            "pixel_size": (.200, .200)
-            }
-    
-    # read in a binary file
-    data, header = read_binary(**params)
-    
-    return data, params
-    
-def run():
-    # get the sample data
-    data, params = get_cbr4_sample_img
-    # convert the data from 2d array to xyi relative to beam center
-    xyi = detector2D_to_1D(data, **params)
-    # convert xy to r
-    r = np.linalg.norm(xyi[:,0:2])
-    # bin i based on r
-    
-    
-if __name__ == "__main__":
-    run()
+import nose
+from nose.tools import make_decorator
+
+
+def known_fail_if(cond):
+    """
+    Make sure a known failure fails.
+
+    This function is a decorator factory.
+    """
+    # make the decorator function
+    def dec(in_func):
+        # make the wrapper function
+        # if the condition is True
+        if cond:
+            def inner_wrap():
+                # try the test anywoy
+                try:
+                    in_func()
+                # when in fails, raises KnownFailureTest
+                # which is registered with nose and it will be marked
+                # as K in the results
+                except Exception:
+                    raise KnownFailureTest()
+                # if it does not fail, raise KnownFailureDidNotFailTest which
+                # is a normal exception.  This may seem counter-intuitive
+                # but knowing when tests that _should_ fail don't can be useful
+                else:
+                    raise KnownFailureDidNotFailTest()
+            # use `make_decorator` from nose to make sure that the meta-data on
+            # the function is forwarded properly (name, teardown, setup, etc)
+            return make_decorator(in_func)(inner_wrap)
+
+        # if the condition is false, don't make a wrapper function
+        # this is effectively a no-op
+        else:
+            return in_func
+
+    # return the decorator function
+    return dec
+
+
+def skip_if(cond, msg=''):
+    """
+    A decorator to skip a test if condition is met
+    """
+    def dec(in_func):
+        if cond:
+            def wrapper():
+                raise nose.SkipTest(msg)
+            return make_decorator(in_func)(wrapper)
+        else:
+            return in_func
+    return dec

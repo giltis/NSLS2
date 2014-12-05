@@ -4,19 +4,39 @@ import setuptools
 from distutils.core import setup, Extension
 from setupext import ext_modules
 import numpy as np
+import os
+
+# Utility function to read the README file.
+# Used for the long_description.  It's nice, because now 1) we have a top level
+# README file and 2) it's easier to type in the README file than to put a raw
+# string in below ...
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name='NSLS2',
-    version='0.0.x',
+    name='scikit-xray',
+    version='0.0.3',
     author='Brookhaven National Lab',
-    packages=["nsls2",
-              "nsls2.testing",
-              "nsls2.fitting",
-              "nsls2.fitting.model",
-              "nsls2.fitting.base",
-              "nsls2.io",
-              "nsls2.img_proc",
-    ],
+    description="Data analysis tools for X-ray science",
+    packages=["skxray",
+              "skxray.testing",
+              "skxray.fitting",
+              "skxray.fitting.base",
+              "skxray.io",
+              ],
     include_dirs=[np.get_include()],
-    ext_modules=ext_modules, requires=[]
-)
+    ext_modules=ext_modules,
+    url='http://github.com/Nikea/scikit-xray',
+    keywords='Xray Analysis',
+    license='BSD',
+    classifiers=['Development Status :: 3 - Alpha',
+                 "License :: OSI Approved :: BSD License",
+                 "Programming Language :: Python :: 2.7",
+                 "Programming Language :: Python :: 3.4",
+                 "Topic :: Scientific/Engineering :: Physics",
+                 "Topic :: Scientific/Engineering :: Chemistry",
+                 "Topic :: Software Development :: Libraries",
+                 "Intended Audience :: Science/Research",
+                 "Intended Audience :: Developers",
+                 ]
+    )
