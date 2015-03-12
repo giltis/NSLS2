@@ -82,6 +82,6 @@ def _check_array_size(array_1, array_2):
                                        array_2.shape[2])))
     elif array_1.shape == array_2.shape:
         valid_operation = True
-        resize_arrays = True
+        resize_arrays = False
         corrected_dims = array_1.shape
     return valid_operation, resize_arrays, corrected_dims
