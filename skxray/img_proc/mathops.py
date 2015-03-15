@@ -61,6 +61,16 @@ def _check_array_size(array_1, array_2):
         valid_operation = True
         resize_arrays = False
         corrected_dims = array_1.shape
+    # Verify that the input arrays have equivalent demensionality
+    elif len(array_1.shape) != len(array_2.shape) and \
+            (len(array_2.shape) and array_2.shape[0] != 1):
+        valid_operation = False
+        resize_arrays = True
+        logging.warning("Array dimensions do not match. Reevaluate input "
+                         "arrays and modify as necessary before applying "
+                         "image arithmetic operations. Example: Input array "
+                         "#1 is 2D (len(array1.shape) = 2), and Input array "
+                         "#2 is 3D (len(array2.shape) = 3)")
     # Determine whether dimensions for the two input arrays are equal. If
     # they're not then evaluate the array size which will contain both
     # arrays, thereby allowing for image arithmetic operations.
