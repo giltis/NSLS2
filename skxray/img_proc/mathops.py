@@ -55,10 +55,16 @@ def _check_array_size(array_1, array_2):
     tuple takes the form of (y_dim, x_dim) for evaluation of 2D data sets,
     or (z_dim, y_dim, x_dim) for 3D data sets.
     """
+    # Check to make sure that arithmetic operation does not involve
+    # application of a constant value
+    if len(array_2.shape) and array_2.shape[0] == 1:
+        valid_operation = True
+        resize_arrays = False
+        corrected_dims = array_1.shape
     # Determine whether dimensions for the two input arrays are equal. If
     # they're not then evaluate the array size which will contain both
     # arrays, thereby allowing for image arithmetic operations.
-    if array_1.shape != array_2.shape:
+    elif array_1.shape != array_2.shape:
         if len(array_1.shape) and len(array_2.shape) == 1:
             valid_operation = True
             resize_arrays = True
