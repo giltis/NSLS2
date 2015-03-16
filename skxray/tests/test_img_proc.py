@@ -65,9 +65,9 @@ def test_apply_constant():
     #Int array vs Int constant
     assert_equal(mathops._check_array_size(test_array_int, test_constant_int),
                  (True, False, (30, 30, 30)))
-    #Int vs Float
+    #Data type mismatch
     assert_raises(TypeError, mathops._check_array_size(test_array_int,
                                                        test_constant_flt))
     #Float vs Float
     assert_equal(mathops._check_array_size(test_array_flt, test_constant_flt),
-                 (True, False, (100, 100, 100)))
+                 (True, False, (10, 10, 10)))

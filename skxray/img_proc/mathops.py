@@ -58,13 +58,13 @@ def _check_array_size(input_1, input_2):
     """
     # Check to make sure that arithmetic operation does not involve
     # application of a constant value
-    if type(input_1) or type(input_2) != numpy.ndarray:
+    if type(input_1) or type(input_2) != np.ndarray:
         # Determine whether one of the inputs is an ndarray, and if so,
         # then which one.
         for input_obj in [input_1, input_2]:
-            if type(input_obj) == numpy.ndarray:
+            if type(input_obj) == np.ndarray:
                 array_obj = input_obj
-            if type(input_obj) != numpy.ndarray:
+            if type(input_obj) != np.ndarray:
                 constant_obj = input_obj
         # Confirm that dtypes match. If they don't then raise an error
         if type(constant_obj) != array_obj.dtype:
