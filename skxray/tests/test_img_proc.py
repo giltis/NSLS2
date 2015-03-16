@@ -17,25 +17,7 @@ from skxray.img_proc import mathops
 from numpy.testing import assert_equal, assert_raises
 
 
-test_array_1 = np.zeros((30,30,30), dtype=int)
-test_array_1[0:15, 0:15, 0:15] = 1
-test_array_2 = np.zeros((50, 70, 50), dtype=int)
-test_array_2[25:50, 25:50, 25:50] = 87
-test_array_3 = np.zeros((10,10,10), dtype=float)
-test_array_4 = np.zeros((100,100,100), dtype=float)
-test_array_5 = np.zeros((100,100), dtype=int)
-test_array_5[25:75, 25:75] = 254
-
-test_1D_array_1 = np.zeros((100), dtype=int)
-test_1D_array_2 = np.zeros((10), dtype=int)
-test_1D_array_3 = np.zeros((100), dtype=float)
-
-test_constant_1 = 5
-test_constant_2 = 2.0
-test_constant_3 = 1
-
-
-def test_array_size_check(test_array_1, test_array_2):
+def test_array_size_check():
     """
     Test function for netCDF read function load_netCDF()
 
@@ -47,6 +29,11 @@ def test_array_size_check(test_array_1, test_array_2):
     -------
 
     """
+    test_array_1 = np.zeros((30,30,30), dtype=int)
+    test_array_1[0:15, 0:15, 0:15] = 1
+    test_array_2 = np.zeros((50, 70, 50), dtype=int)
+    test_array_2[25:50, 25:50, 25:50] = 87
+
     # Test correct operation: 2 int arrays of different size
     assert_equal(mathops._check_array_size(test_array_1, test_array_2),
                  (True, True, (50, 70, 50)))
@@ -55,7 +42,7 @@ def test_array_size_check(test_array_1, test_array_2):
                  (True, False, (30, 30, 30)))
 
 
-def test_apply_constant(test_array_1, test_constant_1):
+def test_apply_constant():
     """
     Test function for netCDF read function load_netCDF()
 
@@ -67,12 +54,20 @@ def test_apply_constant(test_array_1, test_constant_1):
     -------
 
     """
+    test_array_int = np.zeros((30,30,30), dtype=int)
+    test_array_int[0:15, 0:15, 0:15] = 1
+
+    test_array_flt = np.zeros((10,10,10), dtype=float)
+
+    test_constant_int = 5
+    test_constant_flt = 2.0
+
     #Int array vs Int constant
-    assert_equal(mathops._check_array_size(test_array_1, test_constant_1),
+    assert_equal(mathops._check_array_size(test_array_int, test_constant_int),
                  (True, False, (30, 30, 30)))
     #Int vs Float
-    assert_raises(TypeError, mathops._check_array_size(test_array_1,
-                                                       test_constant_2))
+    assert_raises(TypeError, mathops._check_array_size(test_array_int,
+                                                       test_constant_flt))
     #Float vs Float
-    assert_equal(mathops._check_array_size(test_array_3, test_constant_2),
+    assert_equal(mathops._check_array_size(test_array_flt, test_constant_flt),
                  (True, False, (100, 100, 100)))
