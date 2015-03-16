@@ -64,10 +64,22 @@ def test_apply_constant():
 
     #Int array vs Int constant
     assert_equal(mathops._check_array_size(test_array_int, test_constant_int),
-                 (True, False, (30, 30, 30)))
+                 (True, False, (30, 30, 30)), "Test: Integer array coupled "
+                                              "with an integer constant, "
+                                              "has failed. Something in the "
+                                              "helper function "
+                                              "_check_array_size has changed "
+                                              "and is generating this error.")
     #Data type mismatch
-    assert_raises(TypeError, mathops._check_array_size(test_array_int,
-                                                       test_constant_flt))
+    assert_raises(TypeError,
+                  mathops._check_array_size,
+                  test_array_int,
+                  test_constant_flt)
     #Float vs Float
     assert_equal(mathops._check_array_size(test_array_flt, test_constant_flt),
-                 (True, False, (10, 10, 10)))
+                 (True, False, (10, 10, 10)), "Test: Float array coupled "
+                                              "with a float constant, "
+                                              "has failed. Something in the "
+                                              "helper function "
+                                              "_check_array_size has changed "
+                                              "and is generating this error.")
