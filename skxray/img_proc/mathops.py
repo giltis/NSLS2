@@ -71,6 +71,16 @@ def _check_array_size(array_1, array_2):
                          "image arithmetic operations. Example: Input array "
                          "#1 is 2D (len(array1.shape) = 2), and Input array "
                          "#2 is 3D (len(array2.shape) = 3)")
+    # If input data is 1-dimensional then raise warning, as 1-dimensional
+    # image data sets are atypical.
+    elif len(array_1.shape) and len(array_2.shape) == 1:
+        valid_operation = True
+        resize_arrays = False
+        corrected_dims = array_1.shape
+        logging.warning("Input arrays are 1-dimensional. While the input "
+                        "arrays may contain valid image data, this format "
+                        "is atypical (as most image data being processed "
+                        "is to be evaluated using 2D or 3D image arrays.")
     # Determine whether dimensions for the two input arrays are equal. If
     # they're not then evaluate the array size which will contain both
     # arrays, thereby allowing for image arithmetic operations.
