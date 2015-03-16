@@ -33,3 +33,20 @@ test_1D_array_3 = np.zeros((100), dtype=float)
 test_constant_1 = 5
 test_constant_2 = 2.0
 test_constant_3 = 1
+
+def test_array_size_check(test_array_1, test_array_2):
+    """
+    Test function for netCDF read function load_netCDF()
+
+    Parameters
+    ----------
+    test_data : str
+
+    Returns
+    -------
+
+    """
+
+    assert_equal(mathops._check_array_size(test_array_1, test_array_2),
+                 (True, True, (50, 70, 50)))
+
