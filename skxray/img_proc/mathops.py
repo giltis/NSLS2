@@ -86,26 +86,22 @@ def _check_array_size(array_1, array_2):
     # arrays, thereby allowing for image arithmetic operations.
     elif array_1.shape != array_2.shape:
         if len(array_1.shape) and len(array_2.shape) == 1:
-            valid_operation = True
-            resize_arrays = True
             corrected_dims = (np.amax((array_1.shape[0],
                                        array_2.shape[0])))
         elif len(array_1.shape) and len(array_2.shape) == 2:
-            valid_operation = True
-            resize_arrays = True
             corrected_dims = (np.amax((array_1.shape[0],
                                        array_2.shape[0])),
                               np.amax((array_1.shape[1],
                                        array_2.shape[1])))
         elif len(array_1.shape) and len(array_2.shape) == 3:
-            valid_operation = True
-            resize_arrays = True
             corrected_dims = (np.amax((array_1.shape[0],
                                        array_2.shape[0])),
                               np.amax((array_1.shape[1],
                                        array_2.shape[1])),
                               np.amax((array_1.shape[2],
                                        array_2.shape[2])))
+        valid_operation = True
+        resize_arrays = True
     elif array_1.shape == array_2.shape:
         valid_operation = True
         resize_arrays = False
