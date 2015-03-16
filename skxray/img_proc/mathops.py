@@ -58,10 +58,22 @@ def _check_array_size(input_1, input_2):
     """
     # Check to make sure that arithmetic operation does not involve
     # application of a constant value
-    if type(input_2.shape) and input_2.shape[0] == 1:
+    if type(input_1) or type(input_2) != numpy.ndarray:
+        # Determine whether one of the inputs is an ndarray, and if so,
+        # then which one.
+        for input_obj in [input_1, input_2]:
+            if type(input_obj) == numpy.ndarray:
+                array_obj = input_obj
+            if type(input_obj) != numpy.ndarray:
+                constant_obj = input_obj
+        # Confirm that dtypes match. If they don't then raise an error
+        if type(constant_obj) != array_obj.dtype:
+            raise TypeError("The data types do not match. Please check your "
+                            "input data and convert the erroneous input to "
+                            "the desired data type.")
         valid_operation = True
         resize_arrays = False
-        corrected_dims = input_1.shape
+        corrected_dims = array_obj.shape
     # Verify that the input arrays have equivalent demensionality
     elif len(input_1.shape) != len(input_2.shape) and \
             (len(input_2.shape) and input_2.shape[0] != 1):
