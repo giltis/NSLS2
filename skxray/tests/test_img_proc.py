@@ -47,8 +47,12 @@ def test_array_size_check(test_array_1, test_array_2):
     -------
 
     """
+    # Test correct operation: 2 int arrays of different size
     assert_equal(mathops._check_array_size(test_array_1, test_array_2),
                  (True, True, (50, 70, 50)))
+    # Test for arrays with equal dimensionality
+    assert_equal(mathops._check_array_size(test_array_1, test_array_1),
+                 (True, False, (30, 30, 30)))
 
 
 def test_apply_constant(test_array_1, test_constant_1):
