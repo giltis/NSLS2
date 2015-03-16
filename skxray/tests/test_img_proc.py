@@ -14,7 +14,7 @@ import numpy as np
 import six
 from nose.tools import eq_
 from skxray.img_proc import mathops
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_raises
 
 
 test_array_1 = np.zeros((30,30,30), dtype=int)
@@ -34,6 +34,7 @@ test_constant_1 = 5
 test_constant_2 = 2.0
 test_constant_3 = 1
 
+
 def test_array_size_check(test_array_1, test_array_2):
     """
     Test function for netCDF read function load_netCDF()
@@ -46,7 +47,28 @@ def test_array_size_check(test_array_1, test_array_2):
     -------
 
     """
-
     assert_equal(mathops._check_array_size(test_array_1, test_array_2),
                  (True, True, (50, 70, 50)))
 
+
+def test_apply_constant(test_array_1, test_constant_1):
+    """
+    Test function for netCDF read function load_netCDF()
+
+    Parameters
+    ----------
+    test_data : str
+
+    Returns
+    -------
+
+    """
+    #Int array vs Int constant
+    assert_equal(mathops._check_array_size(test_array_1, test_constant_1),
+                 (True, False, (30, 30, 30)))
+    #Int vs Float
+    assert_raises(TypeError, mathops._check_array_size(test_array_1,
+                                                       test_constant_2))
+    #Float vs Float
+    assert_equal(mathops._check_array_size(test_array_3, test_constant_2),
+                 (True, False, (100, 100, 100)))
