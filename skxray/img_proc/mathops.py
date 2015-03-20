@@ -58,13 +58,13 @@ def _check_array_size(input_1, input_2):
     """
     # Check to make sure that arithmetic operation does not involve
     # application of a constant value
-    if type(input_1) or type(input_2) != np.ndarray:
+    if (type(input_1) or type(input_2)) != np.ndarray:
         # Determine whether one of the inputs is an ndarray, and if so,
         # then which one.
         for input_obj in [input_1, input_2]:
             if type(input_obj) == np.ndarray:
                 array_obj = input_obj
-            if type(input_obj) != np.ndarray:
+            elif type(input_obj) != np.ndarray:
                 constant_obj = input_obj
         # Confirm that dtypes match. If they don't then raise an error
         if type(constant_obj) != array_obj.dtype:
@@ -75,48 +75,45 @@ def _check_array_size(input_1, input_2):
         resize_arrays = False
         corrected_dims = array_obj.shape
     # Verify that the input arrays have equivalent demensionality
-    elif len(input_1.shape) != len(input_2.shape) and \
-            (len(input_2.shape) and input_2.shape[0] != 1):
-        valid_operation = False
-        resize_arrays = True
-        logging.warning("Array dimensions do not match. Reevaluate input "
-                         "arrays and modify as necessary before applying "
-                         "image arithmetic operations. Example: Input array "
-                         "#1 is 2D (len(array1.shape) = 2), and Input array "
-                         "#2 is 3D (len(array2.shape) = 3)")
-    # If input data is 1-dimensional then raise warning, as 1-dimensional
-    # image data sets are atypical.
-    elif len(input_1.shape) and len(input_2.shape) == 1:
-        valid_operation = True
-        resize_arrays = False
-        corrected_dims = input_1.shape
-        logging.warning("Input arrays are 1-dimensional. While the input "
-                        "arrays may contain valid image data, this format "
-                        "is atypical (as most image data being processed "
-                        "is to be evaluated using 2D or 3D image arrays.")
-    # Determine whether dimensions for the two input arrays are equal. If
-    # they're not then evaluate the array size which will contain both
-    # arrays, thereby allowing for image arithmetic operations.
-    elif input_1.shape != input_2.shape:
-        if len(input_1.shape) and len(input_2.shape) == 1:
-            corrected_dims = (np.amax((input_1.shape[0],
-                                       input_2.shape[0])))
-        elif len(input_1.shape) and len(input_2.shape) == 2:
-            corrected_dims = (np.amax((input_1.shape[0],
-                                       input_2.shape[0])),
-                              np.amax((input_1.shape[1],
-                                       input_2.shape[1])))
-        elif len(input_1.shape) and len(input_2.shape) == 3:
-            corrected_dims = (np.amax((input_1.shape[0],
-                                       input_2.shape[0])),
-                              np.amax((input_1.shape[1],
-                                       input_2.shape[1])),
-                              np.amax((input_1.shape[2],
-                                       input_2.shape[2])))
-        valid_operation = True
-        resize_arrays = True
-    elif input_1.shape == input_2.shape:
-        valid_operation = True
-        resize_arrays = False
-        corrected_dims = input_1.shape
+    elif type(input_1) and type(input_2) == np.ndarray:
+        if len(input_1.shape) != len(input_2.shape):
+            raise ValueError("Array dimensions do not match. Reevaluate input"
+                             " arrays and modify as necessary before applying "
+                             "image arithmetic operations. "
+                             "Example: "
+                             "Input array #1 is 2D (len(array1.shape) = 2), "
+                             "and Input array #2 is 3D (len(array2.shape) = 3)"
+            )
+        # If input data is 1-dimensional then raise warning, as 1-dimensional
+        # image data sets are atypical.
+        elif len(input_1.shape) and len(input_2.shape) == 1:
+            logging.warning("Input arrays are 1-dimensional. While the input "
+                            "arrays may contain valid image data, this format"
+                            " is atypical (as most image data being processed"
+                            " is to be evaluated using 2D or 3D image arrays.")
+        # Determine whether dimensions for the two input arrays are equal. If
+        # they're not then evaluate the array size which will contain both
+        # arrays, thereby allowing for image arithmetic operations.
+        elif input_1.shape != input_2.shape:
+            if len(input_1.shape) and len(input_2.shape) == 1:
+                corrected_dims = (np.amax((input_1.shape[0],
+                                           input_2.shape[0])))
+            elif len(input_1.shape) and len(input_2.shape) == 2:
+                corrected_dims = (np.amax((input_1.shape[0],
+                                           input_2.shape[0])),
+                                  np.amax((input_1.shape[1],
+                                           input_2.shape[1])))
+            elif len(input_1.shape) and len(input_2.shape) == 3:
+                corrected_dims = (np.amax((input_1.shape[0],
+                                           input_2.shape[0])),
+                                  np.amax((input_1.shape[1],
+                                           input_2.shape[1])),
+                                  np.amax((input_1.shape[2],
+                                           input_2.shape[2])))
+            valid_operation = True
+            resize_arrays = True
+        elif input_1.shape == input_2.shape:
+            valid_operation = True
+            resize_arrays = False
+            corrected_dims = input_1.shape
     return valid_operation, resize_arrays, corrected_dims
