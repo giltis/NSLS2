@@ -11,6 +11,7 @@ and logical operations on image data sets in the VisTrails workflow manager.
 
 import numpy as np
 import logging
+from skxray import core
 
 
 def _check_array_size(input_1, input_2):
