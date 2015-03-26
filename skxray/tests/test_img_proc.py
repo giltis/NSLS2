@@ -11,8 +11,6 @@ data collected at Argonne National Laboratory, Sector 13, GSECars.
 """
 
 import numpy as np
-import six
-from nose.tools import eq_
 from skxray.img_proc import mathops
 from numpy.testing import assert_equal, assert_raises
 
@@ -56,9 +54,7 @@ def test_apply_constant():
     """
     test_array_int = np.zeros((30,30,30), dtype=int)
     test_array_int[0:15, 0:15, 0:15] = 1
-
     test_array_flt = np.zeros((10,10,10), dtype=float)
-
     test_constant_int = 5
     test_constant_flt = 2.0
 
@@ -83,3 +79,6 @@ def test_apply_constant():
                                               "helper function "
                                               "_check_array_size has changed "
                                               "and is generating this error.")
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
