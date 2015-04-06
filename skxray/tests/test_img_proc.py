@@ -11,7 +11,7 @@ data collected at Argonne National Laboratory, Sector 13, GSECars.
 """
 
 import numpy as np
-from skxray.img_proc import mathops
+from skxray import core
 from numpy.testing import assert_equal, assert_raises
 
 
@@ -31,12 +31,12 @@ def test_array_size_check():
     test_array_1[0:15, 0:15, 0:15] = 1
     test_array_2 = np.zeros((50, 70, 50), dtype=int)
     test_array_2[25:50, 25:50, 25:50] = 87
-
+ 
     # Test correct operation: 2 int arrays of different size
-    assert_equal(mathops._check_array_size(test_array_1, test_array_2),
+    assert_equal(core._check_array_size(test_array_1, test_array_2),
                  (True, True, (50, 70, 50)))
     # Test for arrays with equal dimensionality
-    assert_equal(mathops._check_array_size(test_array_1, test_array_1),
+    assert_equal(core._check_array_size(test_array_1, test_array_1),
                  (True, False, (30, 30, 30)))
 
 
@@ -59,7 +59,7 @@ def test_apply_constant():
     test_constant_flt = 2.0
 
     #Int array vs Int constant
-    assert_equal(mathops._check_array_size(test_array_int, test_constant_int),
+    assert_equal(core._check_array_size(test_array_int, test_constant_int),
                  (True, False, (30, 30, 30)), "Test: Integer array coupled "
                                               "with an integer constant, "
                                               "has failed. Something in the "
@@ -68,11 +68,11 @@ def test_apply_constant():
                                               "and is generating this error.")
     #Data type mismatch
     assert_raises(TypeError,
-                  mathops._check_array_size,
+                  core._check_array_size,
                   test_array_int,
                   test_constant_flt)
     #Float vs Float
-    assert_equal(mathops._check_array_size(test_array_flt, test_constant_flt),
+    assert_equal(core._check_array_size(test_array_flt, test_constant_flt),
                  (True, False, (10, 10, 10)), "Test: Float array coupled "
                                               "with a float constant, "
                                               "has failed. Something in the "

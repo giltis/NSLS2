@@ -1192,6 +1192,7 @@ def _check_array_size(input_1, input_2):
     available to actually resize the source arrays as this is beyond the
     scope of this tool.
 
+
     Parameters
     ----------
     input_1 : {ndarray, int, float}
@@ -1203,6 +1204,7 @@ def _check_array_size(input_1, input_2):
     The second array to which input_1 will be applied, compared or combined.
     Alternatively, this input can also be a constant to which the first
     input array will be applied.
+
 
     Returns
     -------
@@ -1225,10 +1227,11 @@ def _check_array_size(input_1, input_2):
     tuple takes the form of (y_dim, x_dim) for evaluation of 2D data sets,
     or (z_dim, y_dim, x_dim) for 3D data sets.
     """
+
+
     # Check to make sure that arithmetic operation does not involve
     # application of a constant value
     if (type(input_1) or type(input_2)) != np.ndarray:
-        print "Constant is being applied to array"
         # Determine whether one of the inputs is an ndarray, and if so,
         # then which one.
         for input_obj in [input_1, input_2]:
@@ -1236,8 +1239,6 @@ def _check_array_size(input_1, input_2):
                 array_obj = input_obj
             elif type(input_obj) != np.ndarray:
                 constant_obj = input_obj
-        print constant_obj
-        print array_obj
         # Confirm that dtypes match. If they don't then raise an error
         if type(constant_obj) != array_obj.dtype:
             raise TypeError("The data types do not match. Please check your "
