@@ -1294,7 +1294,7 @@ def _check_array_size(input_1, input_2):
     return valid_operation, resize_arrays, corrected_dims
 
 
-def _mddict_create (input_array, mddict=None):
+def mddict_create (input_array, mddict=None):
     """
     This function initially tests to make sure that a metadata dictionary is
     associated with the specified image array. If a metadata dictionary is
@@ -1314,10 +1314,11 @@ def _mddict_create (input_array, mddict=None):
     This dictionary is validated to ensure that values and assignments are
     consistent with any and all modifications to the input array.
     """
+
+    dict_keys_basic = ['array_dimensions', 'energy', 'bounding_box',
+                       'source_file_name', 'data_type', ]
     if mddict == None:
         #Create metadata dictionary specific to the specified input array
-        mddict = MD_dict(keys_core)
-
         #Params to include:
         #   Array dimensions: eq to input_array.shape
         #   data type: eq to input_array.dtype
@@ -1330,6 +1331,25 @@ def _mddict_create (input_array, mddict=None):
         #   Histogram peak locations??
         #   Histogram valley centers?
         #   OTHER????
+        #--------------------------
+        mddict = MD_dict()
+        {'file_name' : {'path' : str,
+                        'file_name' : str},
+         'dimensions' : {'x' : int,
+                         'y' : int,
+                         'z' : int,
+                         'theta' : int,
+                         'time' : int},
+         'collection_energy' : float,
+         'modality'
+         'bounding_box' : ('x_min', 'x_max', 'y_min', 'y_max', 'z_min',
+                           'z_max'),
+         'data_type' : str,
+         'stats' : {'max': float, 'min' : float, 'kurtosis', 'skewness', \
+        'histogram' : {'peak_locations':[], 'valley_mins':[]},
+        'threshold_value' : }
+         }
+
     else:
         #Compare and validate values present in the mddict.
         # Do I need to include only the current values (assuming there is a
@@ -1343,3 +1363,14 @@ def _mddict_create (input_array, mddict=None):
         #         original source)
         pass
     return mddict
+
+
+def mddict_validate(input_array, input_mddict):
+    """
+
+    :param input_array:
+    :param input_mddict:
+    :return:
+    """
+    for key in input_mddict.keys():
+        
