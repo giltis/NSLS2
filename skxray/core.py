@@ -1292,3 +1292,54 @@ def _check_array_size(input_1, input_2):
             resize_arrays = False
             corrected_dims = input_1.shape
     return valid_operation, resize_arrays, corrected_dims
+
+
+def _mddict_create (input_array, mddict=None):
+    """
+    This function initially tests to make sure that a metadata dictionary is
+    associated with the specified image array. If a metadata dictionary is
+    not associated with the data set, then one is created. The metadata
+    dictionary is to be a persistent catalogue of pertinent attributes of the
+    data set.
+
+    Parameters
+    ----------
+    input_array : ndarray
+
+    mddict : dictionary, optional
+
+    Returns
+    -------
+    mddict : dictionary
+    This dictionary is validated to ensure that values and assignments are
+    consistent with any and all modifications to the input array.
+    """
+    if mddict == None:
+        #Create metadata dictionary specific to the specified input array
+        mddict = MD_dict(keys_core)
+
+        #Params to include:
+        #   Array dimensions: eq to input_array.shape
+        #   data type: eq to input_array.dtype
+        #   source file name??
+        #   resolution??
+        #   imaging modality (e.g. tomography (absorption, phase contrast),
+        #       CLSM, fluorescence
+        #   Max/Min Value
+        #   Histogram???
+        #   Histogram peak locations??
+        #   Histogram valley centers?
+        #   OTHER????
+    else:
+        #Compare and validate values present in the mddict.
+        # Do I need to include only the current values (assuming there is a
+        # change?) or
+        # should there be a conscious way to keep track of changes
+        #   (e.g. when an array is increased in size, remember the origin,
+        #         original dims and the new dims? or
+        #         similarly, after a volume is cropped, remember the original
+        #         dims, the crop values (similar to remembering origin in that
+        #         you can trace back the location of the cropped volume in the
+        #         original source)
+        pass
+    return mddict
