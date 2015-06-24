@@ -5,21 +5,43 @@
 This module contains tools for thresholding data sets.
 """
 
-"""
-REVISION LOG: (FORMAT: "PROGRAMMER INITIALS: DATE -- RECORD")
-GCI: 2/11/2014 -- Modifying documentation of the package functions for 
-    inclusion in the bulk module pull to GITHUB
-GCI: 2/19/2014 -- Renaming module from C4_threshops to threshops.py
-    Updating documentation to docstring convention.
-    Changed module back from class structure to a simple module containing
-    thresholding function definitions.
-GCI: 9/23/14 -- Modified all functions to auto-wrap into the image
-    processing library in vistrails.
-"""
 
 import numpy as np
 import skimage.filter as sk
 
+def check_saturation (src_data):
+    """
+    This function is a helper function to test for potentially erroneous
+    thresholding results.
+
+    First:
+        The function checks the entire source data set to confirm that the
+        binary result is not completely "saturated" with all values set
+        equal to 1, nor that the source array is "empty" with all values set
+        equal to 0.
+        If the source array is either completely saturated or empty, then a
+        warning is produced to alert the user of a potential error.
+
+    Second:
+        If the source array has more than 2 dimensions, then the array is
+        evaluated slice-by-slice along each of the axial dimensions. Slices
+        that meet the evaluation criteria, with all values eq. 0 (empty) or
+        eq. 1 (saturated) are logged to assist the user in identifying:
+            (A) exterior regions outside of the Region Of Interest (ROI), for
+                cropping, or
+            (B) artifacts or problematic regions,
+            (C) the slice record could also be useful for quickly
+                identifying ROI for additional analysis.
+
+    Parameters
+    __________
+    src_data : array
+        Binary array, typically the result of thresholding
+
+    Returns
+    """
+
+    z_dim, y_dim, x_dim = src_data.shape
 
 def thresh_globalGT(src_data, thresh_value, md_dict=None):
     """
@@ -121,10 +143,10 @@ def thresh_bounded(src_data, thresh_value_min, thresh_value_max):
     src_data : ndarray
         Specify the volume to be thresholded.
 
-    thresh_value_MIN : float
+    thresh_value_min : float
         Specify the lower threshold boundary.
 
-    thresh_value_MAX : float
+    thresh_value_max : float
         Specify the upper threshold boundary.
 
     Returns
@@ -133,13 +155,6 @@ def thresh_bounded(src_data, thresh_value_min, thresh_value_max):
         The function returns a binary array where all voxels with values equal 
         to 1 correspond to voxels within the identified threshold range.
     """
-    # Check to make sure that maximum threshold boundary is less than or
-    # equal to the maximum array value, and
-    if thresh_value_max > np.amax(src_data):
-        thresh_value_max = np.amax(src_data)
-    elif thresh_value_min < np.amin(src_data):
-        thresh_value_min = np.amin(src_data)
-
     if thresh_value_min > np.amax(src_data):
         raise ValueError("Selected threshold value is greater than the "
                          "maximum array value. Current settings will "
@@ -222,12 +237,10 @@ def thresh_otsu(src_data):
         The threshold value determined by the thresholding function and used
         to generate the binary volume data set
     """
-    data_max = np.amax(src_data)
-    data_min = np.amin(src_data)
-    if (data_max - data_min) > 1000:
-        num_bins = (data_max - data_min) / 2
+    if (np.ptp(src_data)) > 1000:
+        num_bins = int(np.ptp(src_data) / 2)
     else:
-        num_bins = (data_max - data_min)
+        num_bins = int(np.ptp(src_data))
     thresh_value = sk.threshold_otsu(src_data, num_bins)
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
@@ -254,13 +267,11 @@ def thresh_yen(src_data):
         The threshold value determined by the thresholding function and used
         to generate the binary volume data set
     """
-    data_max = np.amax(src_data)
-    data_min = np.amin(src_data)
-    if (data_max - data_min) > 1000:
-        num_bins = (data_max - data_min) / 2
+    if (np.ptp(src_data)) > 1000:
+        num_bins = int(np.ptp(src_data) / 2)
     else:
-        num_bins = (data_max - data_min)
-    thresh_value = sk.threshold_otsu(src_data, num_bins)
+        num_bins = int(np.ptp(src_data))
+    thresh_value = sk.threshold_yen(src_data, num_bins)
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
 
@@ -286,42 +297,11 @@ def thresh_isodata(src_data):
         The threshold value determined by the thresholding function and used
         to generate the binary volume data set
     """
-    data_max = np.amax(src_data)
-    data_min = np.amin(src_data)
-    if (data_max - data_min) > 1000:
-        num_bins = int((data_max - data_min) / 2)
+    if (np.ptp(src_data)) > 1000:
+        num_bins = int(np.ptp(src_data) / 2)
     else:
-        num_bins = int((data_max - data_min))
+        num_bins = int(np.ptp(src_data))
     thresh_value = sk.threshold_isodata(src_data, num_bins)
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
-
-
-thresh_adapt.k_shape = ['2D', '3D']
-thresh_adapt.filter_type = ['generic', 'gaussian', 'mean', 'median']
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# TODO Add simple multi thresholding tool
-# TODO Add auto thresholding methods including:
-# 1st derivative
-# entropy
-# moments
-# factorization
-# OTHERS...
-# MULTI-THRESHOLDING
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# def thresh_multi(self, src_data):
-# output = not src_data
-# print 'Operation successful: ' + "NOT " + src_data
-# return output
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# FIRST DERIVATIVE THRESHOLDING
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# def thresh_firstDerivative(self, op_type='offset', offset_image=0):
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# k_shape : string
-# Specify whether the kernel to be applied during automatic thresholding
-# is to be 2-dimensional ('2D') or 3-dimensional ('3D')
-# k_size : integer
-# Specify the size (in pixels) of the kernel to be used for thresholding
-# Note: specified kernel sizes must be odd integers greater than 1
 
